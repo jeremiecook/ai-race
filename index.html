@@ -3,15 +3,28 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Machine Learning</title>
+
+    <!-- Neataptic -->
+    <script src="https://cdn.rawgit.com/wagenaartje/neataptic/14736f72/dist/neataptic.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+
+    <link rel="stylesheet" href="assets/css/game.css">
+
 </head>
 <body>
-		<!-- Game -->
-		<div id="game"></div>
 
-	<!-- Libraries JS -->
+	<!-- Game Display -->
+	<div id="game" class="board">
+		<div class="player" style="top:200px; left: 200px"></div>
+	</div>
+
+	<!-- Vendors -->
 	<script src="vendors/phaser.min.js"></script>
-	<script src="vendors/neataptic.js"></script>
-	<script src="assets/js/room.js"></script>
-	<script src="assets/js/main.js"></script>
+	<!--<script src="vendors/neataptic.js"></script>-->
+
+	<!-- Core Game -->
+	<script src="assets/js/board.js"></script>
+	<script src="assets/js/player.js"></script>
+	<script src="assets/js/training.js"></script>
 </body>
 </html>
