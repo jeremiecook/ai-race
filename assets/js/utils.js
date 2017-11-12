@@ -1,4 +1,10 @@
 /**
+ * Fonction de débug
+ */
+
+var lg = console.log.bind(console)
+
+/**
  * Fonctions mathématiques
  */
 

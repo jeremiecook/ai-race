@@ -62,6 +62,8 @@ Player.prototype = {
 						* 200 // Accélération max 200
 					);
 
+		lg(Math.round(Math.degrees(angle)));
+
 		// Déplacement du vaisseau
 		this.move(angle, thrust);
 
@@ -84,7 +86,7 @@ Player.prototype = {
 	move: function (angle, thrust) {
 
 		// On ajoute l'angle de rotation
-		this.angle += angle;
+		angle += this.angle
 
 		// Calcul des vecteurs de vitesse
 		this.vx += Math.round(thrust * Math.cos( angle ));
@@ -94,9 +96,13 @@ Player.prototype = {
 		this.x += this.vx;
 		this.y += this.vy;
 
+		// On met à jour l'angle du vaisseau
+		this.angle = Math.angle({x: 0, y: 0}, {x:this.vx, y:this.vy});
+
 		// Frottements en fin de tour (.85)
 		this.vx *= .85;
 		this.vy *= .85;
+
 	},
 
 	/**
