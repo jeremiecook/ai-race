@@ -7,23 +7,37 @@
     <!-- Neataptic -->
     <script src="https://cdn.rawgit.com/wagenaartje/neataptic/14736f72/dist/neataptic.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
-
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.16/p5.js"></script>
     <link rel="stylesheet" href="assets/css/game.css">
 
 </head>
 <body>
 
 	<!-- Game Display -->
-	<div id="game" class="board">
-		<div class="player" style="top:200px; left: 200px"></div>
-	</div>
 
+	<div class="display">
+		<div class="information">
+			<ul>
+				<li>Population : <span id="info-population"></span></li>
+				<li>Itérations : <span id="info-iterations"></span></li>
+				<li>Génération : <span id="info-generation"></span></li>
+				<li>Score moyen : <span id="info-average"></span></li>
+				<li>Meilleur score : <span id="info-best"></span></li>
+			</ul>
+
+			<a href="#" class="button run">Start</a>
+			<a href="#" class="button next">⮕</a>
+
+		</div>
+		<div id="game" class="board"></div>
+	</div>
 	<!-- Vendors -->
-	<script src="vendors/phaser.min.js"></script>
 	<!--<script src="vendors/neataptic.js"></script>-->
 
 	<!-- Core Game -->
+	<script src="assets/js/utils.js"></script>
 	<script src="assets/js/board.js"></script>
+	<script src="assets/js/checkpoint.js"></script>
 	<script src="assets/js/player.js"></script>
 	<script src="assets/js/training.js"></script>
 </body>

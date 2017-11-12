@@ -1,12 +1,61 @@
+.display {
+	display: flex;
+}
+
 .board {
 
 	position: relative;
-
 	width: 800px;
 	height: 450px;
 	background: #565DAA;
+	overflow: hidden;
 }
 
+.information {
+	padding: 20px;
+    font-size: 12px;
+    font-family: Raleway;
+    line-height: 1.6;
+    color: #FFF;
+    width: 130px;
+    background: #333;
+}
+
+.information ul {
+	margin: 0;
+	padding: 0;
+}
+
+.information li {
+	list-style: none;
+}
+
+.information span {
+	font-weight: Bold;
+}
+
+a.button {
+    display: inline-block;
+
+    width: 60px;
+
+	margin: 10px 2px 0 0;
+    padding: 4px;
+
+    border: 2px solid #FFF;
+    border-radius: 5px;
+
+	text-align: center;
+    text-decoration: none;
+    background: #02BFF4;
+
+    color: #FFF;
+    font-weight: 600;
+}
+
+a.button.next {
+	width: 20px;
+}
 
 .checkpoint {
 
@@ -17,15 +66,14 @@
 	background: #E95054;
 	border: 2px solid #FFF;
 
-	width: 40px;
-	height: 40px;
 	border-radius: 100%;
-
-	margin-left: -20px;
-	margin-top: -20px;
+	transform: translate(-50%, -50%);
 
 	text-align: center;
-	line-height: 40px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
 }
 
@@ -36,14 +84,15 @@
     border-style: solid;
     border-width: 0px 15px 30px 15px;*/
     color: #FFF;
-    font-size: 26px;
-    line-height: 40px;
-    text-align: center;
-    width: 40px;
-    height: 40px;
+    font-size: 20px;
+
     border-radius: 100%;
-    border: 2px dotted #FFF;
+    border: 1px dotted #FFF;
     transform: rotate(-50deg);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .player:before {

@@ -1,21 +1,26 @@
 /**
- * Joueurs / Vaisseau
+ * Joueur / Vaisseau
+ * Basé sur un réseau de neurones
  */
 
 function Player (genome) {
 
-	this.radius = 150;
+	this.radius = 400;
 
-	this.x      = 100;
-	this.y      = 100;
+	//this.x      = Math.round (Math.random() * 16000);
+	//this.y      = Math.round (Math.random() * 8000);
+
+	this.x = 4000;
+	this.y = 6000;
+
 	this.vx     = 0;
 	this.vy     = 0;
-	this.angle  = 0
+	this.angle  = Math.radians(-45);
 
 	this.genome = genome;
 	this.genome.score = 0;
-
 	this.checkpoint = 0;
+	this.turn = 0; // Tour de jeu
 
 }
 
@@ -26,42 +31,72 @@ Player.prototype = {
 	 */
 	simulate: function () {
 
-		// Résultat du réseau de neurones
+		// Nouveau tour de jeu
+		this.turn++;
+
+		// Cible : prochain checkpoint
 		var target = board.getCheckpoint(this.checkpoint + 1);
 
-		var distance = Math.distance(this, target);
-		var angle = Math.angle(this, target);
+		// Résultat du réseau de neurones
 
-		var input = [this.vx, this.vy, distance, angle];
+		// Paramètres normalisés
+		var speed = Math.min(500, Math.sqrt ( Math.pow(this.vx, 2) + Math.pow(this.vy, 2))) / 500 ;
+		var distance = Math.min( Math.distance(this, target), 3000) / 3000;
+		var angle = Math.angle(this, target) / (Math.PI * 2);
+		//console.log([speed, distance, angle]);
+
+		// Résultat du réseau de neurones (normalisé)
+		var input = [speed, distance, angle];
 		var output = this.genome.activate(input);
+		//console.log(output);
 
-		console.log(output);
 
 		// On normalise les valeurs récupérées
-		var angle  = Math.round ( output [0] * 90 - 45 );
-		var thrust = Math.round ( Math.ease(output [1]) * 100 );
+		var angle = ( output [0]
+					  * Math.PI * 2 // En radians
+					  - Math.PI  ) // Droite ou gauche
+					  * .1; // 36 / 360 : + ou - 18 degrés
 
-		// Calcul de la vitesse
-		this.vx += Math.round(thrust * Math.cos( Math.radians (angle) ));
-		this.vy += Math.round(thrust * Math.sin( Math.radians (angle) ));
+		var thrust = Math.round (
+						Math.ease(output [1], 3) // Préférence à la full accelération
+						* 200 // Accélération max 200
+					);
 
+		// Déplacement du vaisseau
+		this.move(angle, thrust);
+
+		// Checkpoint atteint ? Nouvelle cible
+		if ( Math.distance (this, target) < 590 ) {
+			this.checkpoint ++;
+		}
+
+		// Mise à jour du score dans le genome
+		var score = ( this.genome.score * (this.turn - 1) // Tour précédent
+					  + this.score()) / this.turn;
+
+		this.genome.score = this.score();
+
+	},
+
+	/**
+	 * Déplacement du vaisseau
+	 */
+	move: function (angle, thrust) {
+
+		// On ajoute l'angle de rotation
+		this.angle += angle;
+
+		// Calcul des vecteurs de vitesse
+		this.vx += Math.round(thrust * Math.cos( angle ));
+		this.vy += Math.round(thrust * Math.sin( angle ));
 
 		// Déplacement du vaisseau
 		this.x += this.vx;
 		this.y += this.vy;
 
-		console.log("Angle " + angle);
-		console.log("Vitesse " + thrust);
-		console.log("VX " + this.x);
-		console.log("VY " + this.y);
-
-		// Checkpoint atteint
-		if ( Math.distance (this, target) < 590 ) {
-			this.checkpoint ++;
-		}
-
-		this.display();
-
+		// Frottements en fin de tour (.85)
+		this.vx *= .85;
+		this.vy *= .85;
 	},
 
 	/**
@@ -69,11 +104,16 @@ Player.prototype = {
 	 */
 	score: function () {
 
-		checkpoint = board.getCheckpoint(this.checkpoint);
-		target = board.getCheckpoint(this.checkpoint + 1);
+		// Checkpoints déjà atteints
+		a = this.checkpoint;
 
-		a = 5 * this.checkpoint;
-		b = 1 - Math.distance(this, target) / Math.distance(checkpoint, target);
+		checkpoint = board.getCheckpoint(this.checkpoint);
+		target     = board.getCheckpoint(this.checkpoint + 1);
+
+		// Ratio de distance jusqu'au prochain checkpoint (0 = proche)
+		b = Math.distance(this, target) / Math.distance(checkpoint, target);
+		b = Math.min(b, 2); // Au delà de deux fois la distance, score = 0;
+		b = (2 - b) / 2; // On normalise
 
 		return a + b;
 	},
@@ -98,11 +138,12 @@ Player.prototype = {
 
 		// On positionne le checkpoint sur la carte
 		this.html.css ({
+			width:  this.radius * 2 * TO_PIXEL,
+			height: this.radius * 2 * TO_PIXEL,
 			left: Math.round(this.x * TO_PIXEL),
 			top:  Math.round(this.y * TO_PIXEL),
-			transform: 'rotate(' + this.angle + 'deg)',
+			transform: 'rotate(' + Math.degrees(this.angle) + 'deg)',
 		});
-
 	},
 
 }

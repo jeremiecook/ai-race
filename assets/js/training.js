@@ -2,10 +2,9 @@
  * Training
  */
 
-
 // GA Settings
-var PLAYER_AMOUNT    = 1;
-var ITERATIONS       = 5; // Nombre de tours de jeu évalués
+var PLAYER_AMOUNT    = 100;
+var ITERATIONS       = 100; // Nombre de tours de jeu évalués
 var MUTATION_RATE    = 0.3;
 var ELITISM          = Math.round(0.1 * PLAYER_AMOUNT); // 10%
 
@@ -19,13 +18,19 @@ var Methods   = neataptic.Methods;
 var Config    = neataptic.Config;
 var Architect = neataptic.Architect;
 
+/** Turn off warnings */
+Config.warnings = false;
+
+
 // Elements de jeu
 var board = new Board();
 
 function Training () {
 
-	board.randomCheckpoints();
-	board.display();
+	// Tableau de joueurs
+	this.players = [];
+	this.iteration = 0;
+
 	this.initialize();
 
 }
@@ -38,7 +43,7 @@ Training.prototype = {
 	initialize: function () {
 
 		this.neat = new Neat(
-			4, // Vitesse x, vitesse y, Input distance, angle
+			3, // Vitesse x, vitesse y, Input distance, angle
 			2, // Angle, Vitesse
 			null,
 			{
@@ -63,47 +68,109 @@ Training.prototype = {
 			}
 		);
 
-		//Initialisation des joueurs
-		for (var player in this.neat.population) {
-		 	genome = this.neat.population[player];
-		 	this.neat.population[player] = new Architect.Random(4, 10, 2);
-		}
+		// Initialisation de génomes aléatoires
+		//for (var genome in this.neat.population) {
+		// 	this.neat.population[genome] = new Architect.Random(3, 10, 2);
+		//}
 
 	},
 
+
+	generation: function () {
+
+		$("#game .checkpoint").remove();
+		$("#game .player").remove();
+
+		board.randomCheckpoints();
+		board.display();
+
+		this.neat.generation++;
+
+		for (var genome in this.neat.population) {
+		 	genome = this.neat.population[genome];
+		 	this.players.push( new Player(genome) );
+		}
+
+	},
 
 	/**
 	 * Chaque génération
 	 */
 	update: function () {
 
-		board.display();
-
-		for(var individual in this.neat.population) {
-
-			genome = this.neat.population[individual];
-		    var player = new Player(genome);
-
-			// Prévision sur n tours de jeu
-			for(var i = 0; i < ITERATIONS; i ++)
-			{
-		    	// Some players are eaten during the iteration
-		    	player.simulate();
-			}
+		// Nouvelle génération de joueurs
+		if (this.players.length == 0) {
+			this.generation();
 		}
 
+		// Simulation d'un tour de jeu pour chaque joueur
+		for(var id in this.players) {
+			this.players[id].simulate();
+			this.players[id].display();
+
+		}
+
+		// Fin de l'évaluation, on crée une nouvelle génération
+		if (this.iteration >= ITERATIONS) {
+
+  			$('#info-population').html (this.neat.popsize);
+  			$('#info-iterations').html (this.iteration);
+  			$('#info-generation').html (this.neat.generation);
+  			$('#info-average').html( Math.round(this.neat.getAverage() * 100 ) / 100 );
+  			$('#info-best').html( Math.round(this.neat.getFittest().score * 100) / 100 );
+
+
+  			var newPopulation = [];
+
+			for(var i = 0; i < this.neat.elitism; i++){
+			    newPopulation.push(this.neat.population[i]);
+			}
+
+			for(var i = 0; i < this.neat.popsize - this.neat.elitism; i++){
+    			newPopulation.push(this.neat.getOffspring());
+  			}
+
+  			this.neat.population = newPopulation;
+  			this.neat.mutate();
+
+			this.players = [];
+			this.iteration = 0;
+
+
+
+		}
+
+		this.iteration ++;
+		//console.log("Fin de tour !");
 	},
+}
+
+var training = new Training();
+
+
+
+// P5 Rendering
+function setup() {
+	//var canvas = createCanvas(800, 450);
+	//canvas.parent('#game');
+	//background(200);
+	//
+	$('a.run').on('click', function () {
+		$('a.run').toggleClass('start');
+		$('a.run').html( $('a.run').hasClass('start') ? 'Stop' : 'Start' );
+	});
+
+	$('a.next').on('click', function () {
+		training.update();
+	});
 
 }
 
-window.onload = function() {
+function draw() {
 
-	var training = new Training();
-
-	//while(true) {
-	training.update();
-	//}
-
+	if ($('a.run').hasClass('start')) {
+		training.update();
+	}
 }
 
 
