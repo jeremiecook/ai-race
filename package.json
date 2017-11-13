@@ -1,0 +1,11 @@
+{
+  "name": "MachineLearning",
+  "version": "0.1.0",
+  "main": "Gulpfile.js",
+  "devDependencies": {
+    "gulp-concat": "^2.6.1",
+    "gulp-uglify": "^3.0.0",
+    "neataptic": "^1.4.7",
+    "pump": "^1.0.2"
+  }
+}

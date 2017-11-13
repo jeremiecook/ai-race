@@ -8,9 +8,7 @@ var BOARD_HEIGHT = 9000;
 
 
 function Board () {
-
 	this.checkpoints = [];
-
 }
 
 Board.prototype = {
@@ -36,7 +34,6 @@ Board.prototype = {
 
 		// Entre 3 et 5 checkpoints
 		// var n = Math.round ( Math.random () * 1 ) + 3;
-		// n = 3;
 
 		// for (var i = 0; i < n ; i++) {
 		// 	var x = Math.round( Math.random() * (BOARD_WIDTH - 1600)) + 800;

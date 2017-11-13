@@ -2,7 +2,9 @@
  * Fonction de débug
  */
 
-var lg = console.log.bind(console)
+if (console) {
+	var lg = console.log.bind(console);
+}
 
 /**
  * Fonctions mathématiques
@@ -19,7 +21,11 @@ Math.distance = function (a, b) {
  * Fonction de distribution
  * Augement les probabilités des extrêmes (0 et 1)
  */
-Math.ease = function (x, e = 2) {
+Math.ease = function (x, e) {
+
+	// Par défaut, au carré
+	if (typeof(e)==='undefined') e = 2;
+
 	return Math.pow(x,e) / ( Math.pow(x,e) + Math.pow(1 - x, e) );
 }
 

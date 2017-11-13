@@ -5,7 +5,7 @@
 	<title>Machine Learning</title>
 
     <!-- Neataptic -->
-    <script src="https://cdn.rawgit.com/wagenaartje/neataptic/14736f72/dist/neataptic.min.js"></script>
+<!--     <script src="https://cdn.rawgit.com/wagenaartje/neataptic/14736f72/dist/neataptic.min.js"></script> -->
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
      <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.16/p5.js"></script>
     <link rel="stylesheet" href="assets/css/game.css">
@@ -27,13 +27,16 @@
 
 			<a href="#" class="button run">Start</a>
 			<a href="#" class="button next">⮕</a>
-			<a href="#" class="button g100">Plus 100</a>
 
 		</div>
 		<div id="game" class="board"></div>
 	</div>
+
 	<!-- Vendors -->
-	<!--<script src="vendors/neataptic.js"></script>-->
+	<script src="vendors/neataptic.js"></script>
+
+	<!-- Json -->
+	<script src="json/population.js"></script>
 
 	<!-- Core Game -->
 	<script src="assets/js/utils.js"></script>
@@ -41,5 +44,6 @@
 	<script src="assets/js/checkpoint.js"></script>
 	<script src="assets/js/player.js"></script>
 	<script src="assets/js/training.js"></script>
+	<script src="assets/js/main.js"></script>
 </body>
 </html>

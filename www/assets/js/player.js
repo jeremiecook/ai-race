@@ -7,15 +7,15 @@ function Player (genome) {
 
 	this.radius = 400;
 
-	//this.x      = Math.round (Math.random() * 16000);
-	//this.y      = Math.round (Math.random() * 8000);
+	this.x      = Math.round (Math.random() * 16000);
+	this.y      = Math.round (Math.random() * 8000);
 
 	this.x = 4000;
 	this.y = 6000;
 
 	this.vx     = 0;
 	this.vy     = 0;
-	this.angle  = Math.radians(-90);
+	this.angle  = Math.radians(0);
 
 	this.genome = genome;
 	this.genome.score = 0;
@@ -41,15 +41,14 @@ Player.prototype = {
 
 		// Paramètres normalisés
 		var speed = Math.min(500, Math.sqrt ( Math.pow(this.vx, 2) + Math.pow(this.vy, 2))) / 500 ;
-		var distance = Math.min( Math.distance(this, target), 3000) / 3000;
-		var angle = Math.angle(this, target) / (Math.PI * 2);
-		//console.log([speed, distance, angle]);
+		var distance = Math.min( Math.distance(this, target), 5000) / 5000;
+		var angle = (this.angle - Math.angle(this, target)) / (Math.PI * 2);
 
 		// Résultat du réseau de neurones (normalisé)
 		var input = [speed, distance, angle];
 		var output = this.genome.activate(input);
-		//console.log(output);
-
+		//lg(input);
+		//lg(output);
 
 		// On normalise les valeurs récupérées
 		var angle = ( output [0]
@@ -58,9 +57,11 @@ Player.prototype = {
 					  * .1; // 36 / 360 : + ou - 18 degrés
 
 		var thrust = Math.round (
-						Math.ease(output [1], 3) // Préférence à la full accelération
+						Math.ease(output [1], 2) // Préférence à la full accelération
 						* 200 // Accélération max 200
 					);
+
+		//lg([angle, thrust]);
 
 		//lg(Math.round(Math.degrees(angle)));
 
@@ -86,19 +87,20 @@ Player.prototype = {
 	 */
 	move: function (angle, thrust) {
 
+		//lg([angle, thrust]);
+
 		// On ajoute l'angle de rotation
-		angle += this.angle
+		this.angle += angle;
 
 		// Calcul des vecteurs de vitesse
-		this.vx += Math.round(thrust * Math.cos( angle ));
-		this.vy += Math.round(thrust * Math.sin( angle ));
+		this.vx += Math.round(thrust * Math.cos( this.angle ));
+		this.vy += Math.round(thrust * Math.sin( this.angle ));
 
 		// Déplacement du vaisseau
 		this.x += this.vx;
 		this.y += this.vy;
 
-		// On met à jour l'angle du vaisseau
-		this.angle = Math.angle({x: 0, y: 0}, {x:this.vx, y:this.vy});
+		//lg([this.vx, this.vy]);
 
 		// Frottements en fin de tour (.85)
 		this.vx *= .85;
@@ -119,10 +121,10 @@ Player.prototype = {
 
 		// Ratio de distance jusqu'au prochain checkpoint (0 = proche)
 		b = Math.distance(this, target) / Math.distance(checkpoint, target);
-		b = Math.min(b, 2); // Au delà de deux fois la distance, score = 0;
-		b = (2 - b) / 2; // On normalise
+		b = Math.min(b, 10); // Au delà de deux fois la distance, score = 0;
+		b = (10 - b) / 10; // On normalise
 
-		return a + b;
+		return (a + b);
 	},
 
 	/**
