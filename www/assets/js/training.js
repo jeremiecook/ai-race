@@ -3,7 +3,7 @@
  */
 
 // Default GA Settings
-var PLAYER_AMOUNT    = 10;
+var PLAYER_AMOUNT    = 1;
 var ITERATIONS       = 200; // Nombre de tours de jeu évalués
 var MUTATION_RATE    = 0.3;
 var ELITISM          = Math.round(0.1 * PLAYER_AMOUNT); // 10%
@@ -13,6 +13,8 @@ var USE_POPULATION   = true;
 // Elements de jeu
 var board = new Board();
 var bestScore = 0;
+
+var DEBUG = false;
 
 /**
  * Initialisation du réseau de neurones
@@ -31,17 +33,17 @@ function Training () {
 		  mutation: [
 		    methods.mutation.ADD_NODE,
 	        methods.mutation.SUB_NODE,
-	        methods.mutation.ADD_CONN,
-	        methods.mutation.SUB_CONN,
+	        // methods.mutation.ADD_CONN,
+	        // methods.mutation.SUB_CONN,
 	        methods.mutation.MOD_WEIGHT,
 	        methods.mutation.MOD_BIAS,
-	        methods.mutation.MOD_ACTIVATION,
-	        methods.mutation.ADD_GATE,
-	        methods.mutation.SUB_GATE,
-	        methods.mutation.ADD_SELF_CONN,
-	        methods.mutation.SUB_SELF_CONN,
-	        methods.mutation.ADD_BACK_CONN,
-			methods.mutation.SUB_BACK_CONN
+	  //       methods.mutation.MOD_ACTIVATION,
+	  //       methods.mutation.ADD_GATE,
+	  //       methods.mutation.SUB_GATE,
+	  //       methods.mutation.ADD_SELF_CONN,
+	  //       methods.mutation.SUB_SELF_CONN,
+	  //       methods.mutation.ADD_BACK_CONN,
+			// methods.mutation.SUB_BACK_CONN
 		  ],
 		  popsize: PLAYER_AMOUNT,
 		  mutationRate: MUTATION_RATE,
@@ -179,6 +181,7 @@ Training.prototype = {
 	},
 
 	export: function () {
+		this.neat.sort();
 		return JSON.stringify(this.neat.export(), null, "\t");
 	}
 

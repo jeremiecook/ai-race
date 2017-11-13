@@ -5,13 +5,18 @@
 
 gulp = require('gulp');
 
+//var pump   = require('pump');
 var concat = require('gulp-concat');
-var rename = require('gulp-rename');
-var uglify = require('gulp-uglify');
-var pump   = require('pump');
+//var rename = require('gulp-rename');
+//var uglify = require('gulp-uglify');
 
 
-var files = [
+
+/**
+ * Version Node.js
+ */
+
+var njs_files = [
 
 	// Libraries
 	'www/vendors/neataptic.js',
@@ -28,35 +33,40 @@ var files = [
 
 ];
 
-/**
- * Concaténation et minification
- */
+gulp.task('node', function (cb) {
 
-// gulp.task('compile', function(){
-//     return gulp.src(files)
-//         .pipe(concat('ml.js'))
-//         .pipe(gulp.dest('dist'))
-//         .pipe(rename('ml.min.js'))
-//         .pipe(uglify())
-//         .pipe(gulp.dest('dist'));
-// });
+  return gulp.src(njs_files)
+    .pipe(concat('node.js'))
+    .pipe(gulp.dest('./dist/'));
 
-
-gulp.task('compress', function (cb) {
-
-	// gulp.src(files)
-	// 	.pipe(concat('ml.min.js'))
-	// 	.pipe(gulp.dest('dist'));
-
-  pump([
-  		gulp.src(files),
-  		concat('ml.js'),
-    	//uglify(),
-    	gulp.dest('dist')
-    ],
-    cb
-  );
 });
 
 
-gulp.task('default', ['compress'], function(){});
+/**
+ * Version Codingame (Standalone)
+ */
+
+var cg_files = [
+
+	// Fonctions mathématiques
+	'www/assets/js/utils.js',
+
+	// Meilleur réseau de neurones
+	'www/export/network.js',
+
+	// Déroulement du jeu
+	'www/assets/js/cg.js',
+
+];
+
+
+gulp.task('codingame', function (cb) {
+
+  return gulp.src(cg_files)
+    .pipe(concat('codingame.js'))
+    .pipe(gulp.dest('./dist/'));
+
+});
+
+
+gulp.task('default', ['node', 'codingame'], function(){});

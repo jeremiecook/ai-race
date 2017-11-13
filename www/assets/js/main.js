@@ -4,7 +4,12 @@
  */
 
 var WWW = true;
-var NODEJS = false;
+var DEBUG = true;
+
+function lg (value) {
+	if (DEBUG) console.log(value);
+};
+
 
 var $BOARD   = $('#game');
 var TO_PIXEL = 800 / 16000;

@@ -27,9 +27,9 @@ Board.prototype = {
 	randomCheckpoints: function () {
 
 		this.checkpoints = [];
-		this.checkpoints.push (new Checkpoint(0, 4000, 6000));
-		this.checkpoints.push (new Checkpoint(1, 9000, 2000));
-		this.checkpoints.push (new Checkpoint(2, 13000, 7000));
+		this.checkpoints.push (new Checkpoint(0, 12013, 5520));
+		this.checkpoints.push (new Checkpoint(1, 10510, 6990));
+		this.checkpoints.push (new Checkpoint(2, 3980, 1472));
 
 
 		// Entre 3 et 5 checkpoints

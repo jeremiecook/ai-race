@@ -2,9 +2,22 @@
  * Fonction de débug
  */
 
-if (console) {
-	var lg = console.log.bind(console);
-}
+// Log dans Codingame
+// function lg (value) {
+
+// 	if (! DEBUG) return;
+
+// 	if (WWW && console) {
+// 		console.log(value);
+// 	} else {
+// 		printErr(value);
+// 	}
+// };
+
+// Log dans le navigateur
+// if (console) {
+// 	var lg = console.log.bind(console);
+// }
 
 /**
  * Fonctions mathématiques
@@ -15,7 +28,7 @@ if (console) {
  */
 Math.distance = function (a, b) {
 	return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
-}
+};
 
 /**
  * Fonction de distribution
@@ -27,7 +40,7 @@ Math.ease = function (x, e) {
 	if (typeof(e)==='undefined') e = 2;
 
 	return Math.pow(x,e) / ( Math.pow(x,e) + Math.pow(1 - x, e) );
-}
+};
 
 /**
  * Calcul d'un angle entre deux vecteurs
@@ -46,7 +59,7 @@ Math.angle = function (a, b) {
   	// a = dy < 0 ? 2 * Math.PI - a : a;
   	// return a;
 
-}
+};
 
 /**
  * Conversion d'un angle en radians
