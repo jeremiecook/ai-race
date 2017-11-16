@@ -51,16 +51,16 @@ Game.prototype = {
 	    var angle = data.next.angle; // Degrés
 
 		// Normalisation des données
-		speed = Math.min(500, speed) / 500 ;
-		distance = Math.min( distance, 8000) / 8000;
-		angle = ((angle + 360) % 360)  / 360;
+		// speed = Math.min(500, speed) / 500 ;
+		// distance = Math.min( distance, 8000) / 8000;
+		// angle = ((angle + 360) % 360)  / 360;
 
 		// Résultat du réseau de neurones (normalisé)
-		var input = [speed, distance, angle];
-		lg(input);
+		// var input = [speed, distance, angle];
+		// lg(input);
 
-		var output = activate(input);
-		lg(output);
+		// var output = activate(input);
+		// lg(output);
 
 
 		var move = this.player.play();

@@ -7,21 +7,22 @@ function Player (genome) {
 
 	this.radius = 400;
 
-	// this.x      = board.checkpoints[0].x;
-	// this.y      = board.checkpoints[0].y;
+	// Position
+	this.x = board.checkpoints[0].x;
+	this.y = board.checkpoints[0].y;
 
-	this.x = 12363;
-	this.y = 5877;
-
+	// Vitesse
 	this.vx     = 0;
 	this.vy     = 0;
 
-	//this.angle  = Math.radians(149.0089684242014);
+	// Angle de départ
 	this.angle = Math.angle(this, board.checkpoints[1]);
 
+	// Génome du réseau de neurone
 	this.genome = genome;
 	this.genome.score = 0;
-	this.checkpoint = 0;
+
+	this.checkpoint = 0; // Checkpoints passés
 	this.turn = 0; // Tour de jeu
 
 }
@@ -104,7 +105,7 @@ Player.prototype = {
 
 		// Paramètres normalisés
 		var speed = Math.min(speed, 500) / 500 ;
-		var distance = Math.min( distance , 8000) / 8000;
+		var distance = Math.min( distance , 4000) / 4000;
 		var angle = angle / (TWO_PI) + 0.5; // 0: -Pi, 0.5: 0, 1: Pi
 
 		//lg([speed, distance, angle]);
