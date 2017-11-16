@@ -10,17 +10,8 @@
 	<!-- Game Display -->
 	<div class="display">
 		<div class="information">
-			<ul>
-				<li>Population : <span id="info-population"></span></li>
-				<li>Itérations : <span id="info-iterations"></span></li>
-				<li>Génération : <span id="info-generation"></span></li>
-				<li>Score moyen : <span id="info-average"></span></li>
-				<li>Meilleur score : <span id="info-best"></span></li>
-			</ul>
-
 			<a href="#" class="button run">Start</a>
 			<a href="#" class="button next">⮕</a>
-
 		</div>
 		<div id="game" class="board"></div>
 	</div>
@@ -31,17 +22,68 @@
 	<script src="vendors/neataptic.js"></script>
 
 	<!-- Json -->
-	<script src="export/population.js"></script>
+	<script src="export/network.js"></script>
 
 	<!-- Core Game -->
 	<script src="assets/js/utils.js"></script>
 	<script src="assets/js/board.js"></script>
 	<script src="assets/js/checkpoint.js"></script>
 	<script src="assets/js/player.js"></script>
-	<script src="assets/js/training.js"></script>
-	<script src="assets/js/main.js"></script>
 
 	<script>
+/**
+ * Initialisation
+ * (Environnement Web)
+ */
+
+var WWW = true;
+var DEBUG = true;
+
+/**
+ * Fonction de débug (pour le web)
+ */
+function lg (value) {
+	if (DEBUG) console.log(value);
+};
+
+
+var $BOARD   = $('#game');
+var TO_PIXEL = 800 / 16000;
+
+var board = {};
+var player = {};
+var bestScore = 0;
+
+// P5 Rendering
+function setup() {
+
+	board = new Board();
+	board.randomCheckpoints();
+	board.display();
+	player = new Player(network);
+
+	$('a.run').on('click', function () {
+		$('a.run').toggleClass('start');
+		$('a.run').html( $('a.run').hasClass('start') ? 'Stop' : 'Start' );
+	});
+
+	$('a.next').on('click', function () {
+		player.simulate();
+		player.display();
+	});
+
+}
+
+function draw() {
+
+	if ($('a.run').hasClass('start')) {
+		player.simulate();
+		player.display();
+	}
+}
+
+
+
 	</script>
 
 </body>

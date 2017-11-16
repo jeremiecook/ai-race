@@ -2,19 +2,31 @@
  * Training
  */
 
+var DEBUG = false;
+
 // Default GA Settings
-var PLAYER_AMOUNT    = 1;
+var PLAYER_AMOUNT    = 100;
 var ITERATIONS       = 200; // Nombre de tours de jeu évalués
 var MUTATION_RATE    = 0.3;
 var ELITISM          = Math.round(0.1 * PLAYER_AMOUNT); // 10%
-var START_HIDDEN     = 0;
+var START_HIDDEN     = 8;
 var USE_POPULATION   = true;
+
+
+// Neataptic framework
+if (typeof(require) !== 'undefined')   var neataptic = require('neataptic');
+var Neat      = neataptic.Neat;
+var Architect = neataptic.architect;
+var methods   = neataptic.methods;
+
+// On masque les warning de la Neataptic
+neataptic.config.warnings = false;
+
 
 // Elements de jeu
 var board = new Board();
-var bestScore = 0;
 
-var DEBUG = false;
+var bestScore = 0;
 
 /**
  * Initialisation du réseau de neurones
@@ -31,8 +43,8 @@ function Training () {
 		null,
 		{
 		  mutation: [
-		    methods.mutation.ADD_NODE,
-	        methods.mutation.SUB_NODE,
+		   // methods.mutation.ADD_NODE,
+	       // methods.mutation.SUB_NODE,
 	        // methods.mutation.ADD_CONN,
 	        // methods.mutation.SUB_CONN,
 	        methods.mutation.MOD_WEIGHT,
@@ -54,9 +66,7 @@ function Training () {
 
 
 	// Utilisation d'une population prédéfinie
-	// if (USE_POPULATION) {
-
-	if (WWW) {
+	if (WWW && USE_POPULATION) {
 
 		var newPop = [];
 		for(var i = 0; i < PLAYER_AMOUNT; i++){

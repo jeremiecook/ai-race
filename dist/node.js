@@ -4532,6 +4532,8 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_25__;
  * Fonctions mathématiques
  */
 
+var TWO_PI = Math.PI * 2;
+
 /**
  * Distance entre deux entités
  */
@@ -4588,10 +4590,8 @@ Math.degrees = function ( radians ) {
  * Board game
  */
 
-
 var BOARD_WIDTH  = 16000;
 var BOARD_HEIGHT = 9000;
-
 
 function Board () {
 	this.checkpoints = [];
@@ -4613,19 +4613,19 @@ Board.prototype = {
 	randomCheckpoints: function () {
 
 		this.checkpoints = [];
-		this.checkpoints.push (new Checkpoint(0, 12013, 5520));
-		this.checkpoints.push (new Checkpoint(1, 10510, 6990));
-		this.checkpoints.push (new Checkpoint(2, 3980, 1472));
+		// this.checkpoints.push (new Checkpoint(0, 12013, 5520));
+		// this.checkpoints.push (new Checkpoint(1, 10510, 6990));
+		// this.checkpoints.push (new Checkpoint(2, 3980, 1472));
 
 
 		// Entre 3 et 5 checkpoints
-		// var n = Math.round ( Math.random () * 1 ) + 3;
+		var n = Math.round ( Math.random () * 1 ) + 3;
 
-		// for (var i = 0; i < n ; i++) {
-		// 	var x = Math.round( Math.random() * (BOARD_WIDTH - 1600)) + 800;
-		// 	var y = Math.round( Math.random() * (BOARD_HEIGHT - 1600)) + 800;
-		// 	this.checkpoints.push (new Checkpoint(i, x, y));
-		// }
+		for (var i = 0; i < n ; i++) {
+			var x = Math.round( Math.random() * (BOARD_WIDTH - 1600)) + 800;
+			var y = Math.round( Math.random() * (BOARD_HEIGHT - 1600)) + 800;
+			this.checkpoints.push (new Checkpoint(i, x, y));
+		}
 
 	},
 
@@ -4706,7 +4706,6 @@ function Player (genome) {
 	this.vy     = 0;
 
 	//this.angle  = Math.radians(149.0089684242014);
-
 	this.angle = Math.angle(this, board.checkpoints[1]);
 
 	this.genome = genome;
@@ -4718,44 +4717,18 @@ function Player (genome) {
 
 Player.prototype = {
 
-	/**
-	 * Simulation d'un tour de jeu
-	 */
-	simulate: function () {
 
-		// Nouveau tour de jeu
-		this.turn++;
+	play: function () {
 
-		// Cible : prochain checkpoint
-		var target = board.getCheckpoint(this.checkpoint + 1);
-
-		// Résultat du réseau de neurones
-
-		// Paramètres pour le réseau de neurones
-		var speed = Math.round(Math.sqrt ( Math.pow(this.vx, 2) + Math.pow(this.vy, 2))) ;
-		var distance = Math.round(Math.distance(this, target));
-		var angle = this.angle - Math.angle(this, target);
-
-		//console.log([this, target]);
-		//console.log(Math.angle(this, target));
-		lg([speed, distance, Math.degrees(angle)]);
-
-		// Paramètres normalisés
-		var speed = Math.min(speed, 500) / 500 ;
-		var distance = Math.min( distance , 8000) / 8000;
-		var angle = angle / (Math.PI * 2);
-
-		//lg([speed, distance, angle]);
-
-		// Résultat du réseau de neurones (normalisé)
-		var input = [speed, distance, angle];
-
-		var output = this.genome.activate(input);
-
+		// Récupération des paramètres
+		var input = this.normalize();
 		lg(input);
+
+		// Valeurs fournies par le génome
+		var output = this.genome.activate(input);
 		lg(output);
 
-		// On normalise les valeurs récupérées
+		// On "dénormalise" les valeurs récupérées
 		var angle = ( output [0]
 					  * Math.PI * 2 // En radians
 					  - Math.PI  ) // Droite ou gauche
@@ -4768,17 +4741,29 @@ Player.prototype = {
 
 		lg([Math.degrees(angle), thrust]);
 
-		//lg(Math.round(Math.degrees(angle)));
+		return {angle:angle, thrust:thrust};
 
-		//lg(this);
+	},
+
+	/**
+	 * Simulation d'un tour de jeu
+	 */
+	simulate: function () {
+
+		// Nouveau tour de jeu
+		this.turn++;
+
+		// Cible : prochain checkpoint
+		this.target = board.getCheckpoint(this.checkpoint + 1);
+
+		// Récupérer le mouvement du joueur
+		var move = this.play();
 
 		// Déplacement du vaisseau
-		this.move(angle, thrust);
-
-
+		this.move(move.angle, move.thrust);
 
 		// Checkpoint atteint ? Nouvelle cible
-		if ( Math.distance (this, target) < 590 ) {
+		if ( Math.distance (this, this.target) < 590 ) {
 			this.checkpoint ++;
 		}
 
@@ -4790,6 +4775,37 @@ Player.prototype = {
 		if (this.genome.score > bestScore) bestScore = this.genome.score;
 
 	},
+
+	/**
+	 * Normalise les paramètres du réseau de neurones
+	 */
+	normalize: function () {
+
+		// Résultat du réseau de neurones
+		// Paramètres pour le réseau de neurones
+		var speed = Math.round(Math.sqrt ( Math.pow(this.vx, 2) + Math.pow(this.vy, 2))) ;
+		var distance = Math.round(Math.distance(this, this.target));
+
+		var angle = this.angle - Math.angle(this, this.target); // Calcul de l'angle vers la cible
+		    angle = ((angle + TWO_PI) % TWO_PI) - Math.PI; // Borné sur -Pi à Pi
+
+		//lg([speed, distance, Math.degrees(angle)]);
+
+		// Paramètres normalisés
+		var speed = Math.min(speed, 500) / 500 ;
+		var distance = Math.min( distance , 8000) / 8000;
+		var angle = angle / (TWO_PI) + 0.5; // 0: -Pi, 0.5: 0, 1: Pi
+
+		//lg([speed, distance, angle]);
+
+		// Résultat du réseau de neurones (normalisé)
+		var input = [speed, distance, angle];
+
+		return input;
+
+	},
+
+
 
 	/**
 	 * Déplacement du vaisseau
@@ -4882,19 +4898,31 @@ Player.prototype = {
  * Training
  */
 
+var DEBUG = false;
+
 // Default GA Settings
-var PLAYER_AMOUNT    = 1;
+var PLAYER_AMOUNT    = 100;
 var ITERATIONS       = 200; // Nombre de tours de jeu évalués
 var MUTATION_RATE    = 0.3;
 var ELITISM          = Math.round(0.1 * PLAYER_AMOUNT); // 10%
-var START_HIDDEN     = 0;
+var START_HIDDEN     = 8;
 var USE_POPULATION   = true;
+
+
+// Neataptic framework
+if (typeof(require) !== 'undefined')   var neataptic = require('neataptic');
+var Neat      = neataptic.Neat;
+var Architect = neataptic.architect;
+var methods   = neataptic.methods;
+
+// On masque les warning de la Neataptic
+neataptic.config.warnings = false;
+
 
 // Elements de jeu
 var board = new Board();
-var bestScore = 0;
 
-var DEBUG = false;
+var bestScore = 0;
 
 /**
  * Initialisation du réseau de neurones
@@ -4911,8 +4939,8 @@ function Training () {
 		null,
 		{
 		  mutation: [
-		    methods.mutation.ADD_NODE,
-	        methods.mutation.SUB_NODE,
+		   // methods.mutation.ADD_NODE,
+	       // methods.mutation.SUB_NODE,
 	        // methods.mutation.ADD_CONN,
 	        // methods.mutation.SUB_CONN,
 	        methods.mutation.MOD_WEIGHT,
@@ -4934,9 +4962,7 @@ function Training () {
 
 
 	// Utilisation d'une population prédéfinie
-	// if (USE_POPULATION) {
-
-	if (WWW) {
+	if (WWW && USE_POPULATION) {
 
 		var newPop = [];
 		for(var i = 0; i < PLAYER_AMOUNT; i++){
@@ -5078,31 +5104,38 @@ Training.prototype = {
  */
 
 var WWW = false;
-var NODEJS = true;
-
 var DEBUG = false;
 
+/**
+ * Fonction de log
+ */
 function lg (value) {
 	if (DEBUG) console.log(value);
 };
 
+/**
+ * Ecriture dans un fichier
+ */
+fs = require('fs');
+function write (file, value, message) {
+	fs.writeFile(file, value, function (err) {
+	  if (err) return console.log(err);
+	  console.log('> ' + message);
+	});
+}
 
-var PLAYER_AMOUNT    = 250;
-var ITERATIONS       = 100; // Nombre de tours de jeu évalués
+
+// Paramètres généraux de l'entrainement
+var PLAYER_AMOUNT    = 300;
+var ITERATIONS       = 300; // Nombre de tours de jeu évalués
+var GENERATIONS      = 1000; // Nombre de génération pour le test
+
+// Paramètre de sélection génétique
 var MUTATION_RATE    = 0.3;
 var ELITISM          = Math.round(0.1 * PLAYER_AMOUNT); // 10%
-var START_HIDDEN     = 0;
-var GENERATIONS      = 1000;
+var START_HIDDEN     = 10;
 
-// Neataptic framework
-var neataptic = require('neataptic');
 
-var Neat      = neataptic.Neat;
-var methods   = neataptic.methods;
-var Config    = neataptic.config;
-var Architect = neataptic.architect;
-
-Config.warnings = false;
 
 
 // Entrainement
@@ -5112,43 +5145,22 @@ var training = new Training();
 for (i = 0; i < ITERATIONS * GENERATIONS; i++) {
 	training.update();
 }
+
+
+// On trie le résultat, les meilleurs en premier
 training.neat.sort();
 
-
 // Enregistrement de la population en JSON
-
 var json = training.export();
+write('www/export/population.json', json, 'Export JSON du résultat');
 
-fs = require('fs');
-fs.writeFile('www/export/population.json', json, function (err) {
-  if (err) return console.log(err);
-  console.log('Export JSON du résultat');
-});
-
-
-// Enregistrement de la population en JS
-
+// Enregistrement de la population en variable JS
 var js = "var population = " + json + ';';
+write('www/export/population.js', js, 'Export JS du résultat');
 
-fs = require('fs');
-fs.writeFile('www/export/population.js', js, function (err) {
-  if (err) return console.log(err);
-  console.log('Export JSON du résultat');
-});
-
-
-
-
-// Enregistrement du meilleur network
-
-
+// Enregistrement du meilleur network en JS standalone
 best = training.neat.population[0];
-
-var f = best.standalone();
-
-fs = require('fs');
-fs.writeFile('www/export/network.js', f, function (err) {
-  if (err) return console.log(err);
-  console.log('Export JS du résultat');
-});
+var best = best.standalone();
+best  += 'var network = {activate};';
+write ('www/export/network.js', best, 'Export JS du meilleur network');
 

@@ -29,7 +29,7 @@ var njs_files = [
 	'www/assets/js/training.js',
 
 	// Main
-	'www/assets/js/cmd.js',
+	'runner/node.js',
 
 ];
 
@@ -54,8 +54,9 @@ var cg_files = [
 	// Meilleur réseau de neurones
 	'www/export/network.js',
 
-	// Déroulement du jeu
-	'www/assets/js/cg.js',
+	// Code
+	'www/assets/js/player.js',
+	'runner/codingame.js',
 
 ];
 

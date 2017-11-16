@@ -8,13 +8,15 @@ function lg (value) {
 	if (DEBUG) printErr(value);
 };
 
-
-
 function Game () {
 
 	this.x = undefined;
 	this.y = undefined;
 	this.angle = undefined;
+
+	// Initialisation d'un joueur avec un génome
+	var network = {activate};
+	this.player = new Player(network);
 
 }
 
@@ -28,7 +30,7 @@ Game.prototype = {
 		// Lecture des informations en début de tour
 		var data = this.read();
 
-	    // Valeur de l'angle au départ
+	    // Mise à jour de l'angle
 	    if (this.angle === undefined) {
 	    	this.angle = Math.angle(
 	    		{x: data.player.x, y: data.player.y},
@@ -37,11 +39,14 @@ Game.prototype = {
 	    }
 
 	    // Calcul de la vitesse
-	    var vx = (this.x === undefined) ? 0 : Math.round((data.player.x - this.x) * .85);
-	    var vy = (this.y === undefined) ? 0 : Math.round((data.player.y - this.y) * .85);
+	    this.player.vx = (this.x === undefined) ? 0 : Math.round((data.player.x - this.x) * .85);
+	    this.player.vy = (this.y === undefined) ? 0 : Math.round((data.player.y - this.y) * .85);
+
+	    // Mise à jour des coordonnées
+	    this.player.x = data.player.x;
+	    this.player.y = data.player.y;
 
 	    // Données pour le réseau de neurones
-	    var speed = Math.round(Math.sqrt ( Math.pow(vx, 2) + Math.pow(vy, 2)));
 	    var distance = data.next.distance;
 	    var angle = data.next.angle; // Degrés
 
@@ -57,32 +62,22 @@ Game.prototype = {
 		var output = activate(input);
 		lg(output);
 
-		// On normalise les valeurs récupérées
-		var angle = ( output [0]
-					  * Math.PI * 2 // En radians
-					  - Math.PI  ) // Droite ou gauche
-					  * .1; // 36 / 360 : + ou - 18 degrés
 
-		var thrust = Math.round (
-						Math.ease(output [1], 2) // Préférence à la full accelération
-						* 100 // Accélération max 200
-					);
+		var move = this.player.play();
 
-
-	    //lg(Math.degrees(oa));
 
 	    // Mise à jour des informations
 	    this.x = data.player.x;
 	    this.y = data.player.y;
-	    this.angle += angle;
+	    this.angle += move.angle;
 
 	    // Calcul des coordonnées cible
 	    tx = this.x + Math.round(1000 * Math.cos(this.angle));
 	    ty = this.y + Math.round(1000 * Math.sin(this.angle));
 
 	    // On joue notre coup
-	    lg([tx, ty, thrust]);
-	    this.write(tx, ty, thrust);
+	    lg([tx, ty, move.thrust]);
+	    this.write(tx, ty, move.thrust);
 
 	},
 
@@ -112,16 +107,15 @@ Game.prototype = {
 	    var opponentY = parseInt(inputs[1]);
 
 	    return data;
-
 	},
 
 	/**
 	 * Ecriture du résultat en sortie
 	 */
 	write: function (x, y, thrust) {
+
 		print(x + ' ' + y + ' ' + thrust);
 	},
-
 
 };
 

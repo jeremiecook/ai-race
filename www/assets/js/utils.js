@@ -23,6 +23,8 @@
  * Fonctions mathématiques
  */
 
+var TWO_PI = Math.PI * 2;
+
 /**
  * Distance entre deux entités
  */

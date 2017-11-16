@@ -17,7 +17,6 @@ function Player (genome) {
 	this.vy     = 0;
 
 	//this.angle  = Math.radians(149.0089684242014);
-
 	this.angle = Math.angle(this, board.checkpoints[1]);
 
 	this.genome = genome;
@@ -29,44 +28,18 @@ function Player (genome) {
 
 Player.prototype = {
 
-	/**
-	 * Simulation d'un tour de jeu
-	 */
-	simulate: function () {
 
-		// Nouveau tour de jeu
-		this.turn++;
+	play: function () {
 
-		// Cible : prochain checkpoint
-		var target = board.getCheckpoint(this.checkpoint + 1);
-
-		// Résultat du réseau de neurones
-
-		// Paramètres pour le réseau de neurones
-		var speed = Math.round(Math.sqrt ( Math.pow(this.vx, 2) + Math.pow(this.vy, 2))) ;
-		var distance = Math.round(Math.distance(this, target));
-		var angle = this.angle - Math.angle(this, target);
-
-		//console.log([this, target]);
-		//console.log(Math.angle(this, target));
-		lg([speed, distance, Math.degrees(angle)]);
-
-		// Paramètres normalisés
-		var speed = Math.min(speed, 500) / 500 ;
-		var distance = Math.min( distance , 8000) / 8000;
-		var angle = angle / (Math.PI * 2);
-
-		//lg([speed, distance, angle]);
-
-		// Résultat du réseau de neurones (normalisé)
-		var input = [speed, distance, angle];
-
-		var output = this.genome.activate(input);
-
+		// Récupération des paramètres
+		var input = this.normalize();
 		lg(input);
+
+		// Valeurs fournies par le génome
+		var output = this.genome.activate(input);
 		lg(output);
 
-		// On normalise les valeurs récupérées
+		// On "dénormalise" les valeurs récupérées
 		var angle = ( output [0]
 					  * Math.PI * 2 // En radians
 					  - Math.PI  ) // Droite ou gauche
@@ -79,17 +52,29 @@ Player.prototype = {
 
 		lg([Math.degrees(angle), thrust]);
 
-		//lg(Math.round(Math.degrees(angle)));
+		return {angle:angle, thrust:thrust};
 
-		//lg(this);
+	},
+
+	/**
+	 * Simulation d'un tour de jeu
+	 */
+	simulate: function () {
+
+		// Nouveau tour de jeu
+		this.turn++;
+
+		// Cible : prochain checkpoint
+		this.target = board.getCheckpoint(this.checkpoint + 1);
+
+		// Récupérer le mouvement du joueur
+		var move = this.play();
 
 		// Déplacement du vaisseau
-		this.move(angle, thrust);
-
-
+		this.move(move.angle, move.thrust);
 
 		// Checkpoint atteint ? Nouvelle cible
-		if ( Math.distance (this, target) < 590 ) {
+		if ( Math.distance (this, this.target) < 590 ) {
 			this.checkpoint ++;
 		}
 
@@ -101,6 +86,37 @@ Player.prototype = {
 		if (this.genome.score > bestScore) bestScore = this.genome.score;
 
 	},
+
+	/**
+	 * Normalise les paramètres du réseau de neurones
+	 */
+	normalize: function () {
+
+		// Résultat du réseau de neurones
+		// Paramètres pour le réseau de neurones
+		var speed = Math.round(Math.sqrt ( Math.pow(this.vx, 2) + Math.pow(this.vy, 2))) ;
+		var distance = Math.round(Math.distance(this, this.target));
+
+		var angle = this.angle - Math.angle(this, this.target); // Calcul de l'angle vers la cible
+		    angle = ((angle + TWO_PI) % TWO_PI) - Math.PI; // Borné sur -Pi à Pi
+
+		//lg([speed, distance, Math.degrees(angle)]);
+
+		// Paramètres normalisés
+		var speed = Math.min(speed, 500) / 500 ;
+		var distance = Math.min( distance , 8000) / 8000;
+		var angle = angle / (TWO_PI) + 0.5; // 0: -Pi, 0.5: 0, 1: Pi
+
+		//lg([speed, distance, angle]);
+
+		// Résultat du réseau de neurones (normalisé)
+		var input = [speed, distance, angle];
+
+		return input;
+
+	},
+
+
 
 	/**
 	 * Déplacement du vaisseau
