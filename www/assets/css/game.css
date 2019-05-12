@@ -78,7 +78,7 @@ a.button.next {
 }
 
 
-.player {
+.ship {
 	position: absolute;
     /*border-color: transparent transparent #FFF transparent;
     border-style: solid;
@@ -96,7 +96,7 @@ a.button.next {
     align-items: center;
 }
 
-.player span:before {
+.ship span:before {
 	content:"⮕";
 }
 

@@ -4613,13 +4613,14 @@ Board.prototype = {
 	randomCheckpoints: function () {
 
 		this.checkpoints = [];
-		// this.checkpoints.push (new Checkpoint(0, 12013, 5520));
-		// this.checkpoints.push (new Checkpoint(1, 10510, 6990));
-		// this.checkpoints.push (new Checkpoint(2, 3980, 1472));
+		//this.checkpoints.push (new Checkpoint(0, 12013, 5520));
+		//this.checkpoints.push (new Checkpoint(1, 10510, 6990));
+		//this.checkpoints.push (new Checkpoint(1, 3980, 1472));
+		//this.checkpoints.push (new Checkpoint(2, 3980, 1472));
 
 
-		// Entre 3 et 5 checkpoints
-		var n = Math.round ( Math.random () * 1 ) + 3;
+		// Entre 3 et 6 checkpoints
+		var n = 3 + Math.floor ( Math.random () * 3 );
 
 		for (var i = 0; i < n ; i++) {
 			var x = Math.round( Math.random() * (BOARD_WIDTH - 1600)) + 800;
@@ -4696,16 +4697,25 @@ function Player (genome) {
 
 	this.radius = 400;
 
-	// Position
-	this.x = board.checkpoints[0].x;
-	this.y = board.checkpoints[0].y;
+	// Defaut
+	this.x = 0;
+	this.y = 0;
+	this.angle = 0;
 
 	// Vitesse
 	this.vx     = 0;
 	this.vy     = 0;
 
-	// Angle de départ
-	this.angle = Math.angle(this, board.checkpoints[1]);
+	if (typeof board !== "undefined") {
+
+		// Position
+		this.x = board.checkpoints[0].x;
+		this.y = board.checkpoints[0].y;
+
+		// Angle de départ
+		this.angle = Math.angle(this, board.checkpoints[1]);
+
+	}
 
 	// Génome du réseau de neurone
 	this.genome = genome;
@@ -4719,15 +4729,18 @@ function Player (genome) {
 Player.prototype = {
 
 
-	play: function () {
+	play: function (speed, distance, angle) {
+
+		lg("MOVE");
 
 		// Récupération des paramètres
-		var input = this.normalize();
+		var input = this.normalize(speed, distance, angle);
+		lg([speed, distance, Math.degrees(angle)]);
 		lg(input);
 
 		// Valeurs fournies par le génome
 		var output = this.genome.activate(input);
-		lg(output);
+		//lg(output);
 
 		// On "dénormalise" les valeurs récupérées
 		var angle = ( output [0]
@@ -4757,8 +4770,14 @@ Player.prototype = {
 		// Cible : prochain checkpoint
 		this.target = board.getCheckpoint(this.checkpoint + 1);
 
+		// Résultat du réseau de neurones
+		// Paramètres pour le réseau de neurones
+		var speed = Math.round(Math.sqrt ( Math.pow(this.vx, 2) + Math.pow(this.vy, 2))) ;
+		var distance = Math.round(Math.distance(this, this.target));
+		var angle = Math.angle(this, this.target) - this.angle; // Calcul de l'angle vers la cible
+
 		// Récupérer le mouvement du joueur
-		var move = this.play();
+		var move = this.play(speed, distance, angle);
 
 		// Déplacement du vaisseau
 		this.move(move.angle, move.thrust);
@@ -4780,24 +4799,13 @@ Player.prototype = {
 	/**
 	 * Normalise les paramètres du réseau de neurones
 	 */
-	normalize: function () {
-
-		// Résultat du réseau de neurones
-		// Paramètres pour le réseau de neurones
-		var speed = Math.round(Math.sqrt ( Math.pow(this.vx, 2) + Math.pow(this.vy, 2))) ;
-		var distance = Math.round(Math.distance(this, this.target));
-
-		var angle = this.angle - Math.angle(this, this.target); // Calcul de l'angle vers la cible
-		    angle = ((angle + TWO_PI) % TWO_PI) - Math.PI; // Borné sur -Pi à Pi
-
-		//lg([speed, distance, Math.degrees(angle)]);
+	normalize: function (speed, distance, angle) {
 
 		// Paramètres normalisés
 		var speed = Math.min(speed, 500) / 500 ;
 		var distance = Math.min( distance , 4000) / 4000;
-		var angle = angle / (TWO_PI) + 0.5; // 0: -Pi, 0.5: 0, 1: Pi
-
-		//lg([speed, distance, angle]);
+		var angle = ((angle + TWO_PI) % TWO_PI) - Math.PI; // Borné sur -Pi à Pi
+		    angle = angle / (TWO_PI) + 0.5; // 0: -Pi, 0.5: 0, 1: Pi
 
 		// Résultat du réseau de neurones (normalisé)
 		var input = [speed, distance, angle];
@@ -4849,7 +4857,7 @@ Player.prototype = {
 	score: function () {
 
 		// Checkpoints déjà atteints
-		a = this.checkpoint;
+		a = this.checkpoint * 2; // 2 > test
 
 		checkpoint = board.getCheckpoint(this.checkpoint);
 		target     = board.getCheckpoint(this.checkpoint + 1);
@@ -4940,10 +4948,10 @@ function Training () {
 		null,
 		{
 		  mutation: [
-		   // methods.mutation.ADD_NODE,
-	       // methods.mutation.SUB_NODE,
-	        // methods.mutation.ADD_CONN,
-	        // methods.mutation.SUB_CONN,
+		   methods.mutation.ADD_NODE,
+	       methods.mutation.SUB_NODE,
+	        methods.mutation.ADD_CONN,
+	        methods.mutation.SUB_CONN,
 	        methods.mutation.MOD_WEIGHT,
 	        methods.mutation.MOD_BIAS,
 	  //       methods.mutation.MOD_ACTIVATION,
@@ -4961,19 +4969,28 @@ function Training () {
 		}
 	);
 
+	console.log(this.neat.population);
+
 
 	// Utilisation d'une population prédéfinie
-	if (WWW && USE_POPULATION) {
+	// if (WWW && USE_POPULATION && false) {
+	// 	var newPop = [];
+	// 	for(var i = 0; i < PLAYER_AMOUNT; i++){
+	// 	  var json = population[i % population.length];
+	// 	  newPop[i] = neataptic.Network.fromJSON(json);
+	// 	}
+	// 	population = newPop;
+	// 	this.neat.population = population;
+	// }
 
-		var newPop = [];
-		for(var i = 0; i < PLAYER_AMOUNT; i++){
-		  var json = population[i % population.length];
-		  newPop[i] = neataptic.Network.fromJSON(json);
-		}
-		population = newPop;
-
-		this.neat.population = population;
+	// Population Random
+	var population = [];
+	for(var i = 0; i < PLAYER_AMOUNT; i++){
+	  population[i] = new Architect.Random(3,START_HIDDEN,2);
 	}
+	this.neat.population = population;
+
+
 
 }
 
@@ -4990,7 +5007,6 @@ Training.prototype = {
 
 		for (var genome in this.neat.population) {
 		 	genome = this.neat.population[genome];
-		 	//console.log(genome);
 		 	this.players.push( new Player(genome) );
 		}
 
@@ -5127,9 +5143,9 @@ function write (file, value, message) {
 
 
 // Paramètres généraux de l'entrainement
-var PLAYER_AMOUNT    = 300;
-var ITERATIONS       = 300; // Nombre de tours de jeu évalués
-var GENERATIONS      = 1000; // Nombre de génération pour le test
+var PLAYER_AMOUNT    = 500;
+var ITERATIONS       = 50; // Nombre de tours de jeu évalués
+var GENERATIONS      = 5000; // Nombre de génération pour le test
 
 // Paramètre de sélection génétique
 var MUTATION_RATE    = 0.3;

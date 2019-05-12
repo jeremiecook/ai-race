@@ -41,33 +41,4 @@ gulp.task('node', function (cb) {
 
 });
 
-
-/**
- * Version Codingame (Standalone)
- */
-
-var cg_files = [
-
-	// Fonctions mathématiques
-	'www/assets/js/utils.js',
-
-	// Meilleur réseau de neurones
-	'www/export/network.js',
-
-	// Code
-	'www/assets/js/player.js',
-	'runner/codingame.js',
-
-];
-
-
-gulp.task('codingame', function (cb) {
-
-  return gulp.src(cg_files)
-    .pipe(concat('codingame.js'))
-    .pipe(gulp.dest('./dist/'));
-
-});
-
-
-gulp.task('default', ['node', 'codingame'], function(){});
+gulp.task('default', ['node'], function(){});
