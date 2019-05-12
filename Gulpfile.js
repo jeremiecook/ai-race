@@ -16,20 +16,18 @@ var concat = require('gulp-concat');
  * Version Node.js
  */
 
-var njs_files = [
+var files = [
 
 	// Libraries
-	'www/vendors/neataptic.js',
+	'docs/vendors/neataptic.js',
 
 	// Core
-	'www/assets/js/utils.js',
-	'www/assets/js/board.js',
-	'www/assets/js/checkpoint.js',
-	'www/assets/js/player.js',
-	'www/assets/js/training.js',
+	'src/core/utils.js',
+	'src/core/game.js',
+	'src/core/training.js',
 
 	// Main
-	'runner/node.js',
+	'src/core/main.js',
 
 ];
 
